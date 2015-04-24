@@ -15,10 +15,7 @@ import org.apache.log4j.Logger;
 import wu.tong.precise.wakeup.core.CacheFactory;
 import wu.tong.precise.wakeup.core.LiveEntity;
 
-import com.bj58.zhaopin.app.engine.context.AppContext;
-import com.bj58.zhaopin.app.engine.task.AppTask;
-
-public class PreciseWakeUpMain implements AppTask {
+public class PreciseWakeUpMain {
 
     public static final Logger logger = Logger.getLogger(PreciseWakeUpMain.class);
     public static final SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -30,21 +27,7 @@ public class PreciseWakeUpMain implements AppTask {
     static final ExecutorService fixExecutor = Executors.newFixedThreadPool(50);
 
     static CacheFactory factory;
-
-    @Override
-    public void init(AppContext context) {
-        //初始化配置    恢复之前缓存的数据
-    }
-
-    @Override
-    public void destory() {
-
-    }
-
-    @Override
-    public void start() {
-    }
-
+    
     public static void main(String[] args) {
         try {
             factory = new CacheFactory<Long>().coreSize(8).topic("test");
@@ -115,7 +98,7 @@ public class PreciseWakeUpMain implements AppTask {
                         //                            System.exit(1);
                         //                        }
                     }
-                }, 0l, 1l, TimeUnit.MILLISECONDS);
+                }, 0l, 5l, TimeUnit.MILLISECONDS);
             }
         } catch (Exception e) {
             e.printStackTrace();
