@@ -6,6 +6,12 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 
+	<scm>
+		<connection>scm:git:git@github.com:/asivy/precisewakeup.git</connection>
+		<developerConnection>scm:git:git@github.com:/asivy/precisewakeup.git</developerConnection>
+		<url>git@github.com:/asivy/precisewakeup.git</url>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -94,7 +100,7 @@
 		<dependency>
 			<groupId>org.mapdb</groupId>
 			<artifactId>mapdb</artifactId>
-			<version>1.0.7</version>
+			<version>2.0-alpha1</version>
 		</dependency>
 
 		<dependency>
