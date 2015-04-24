@@ -93,7 +93,7 @@ public class CacheFactory<T> {
             }
             latch.await();
             hasStart = true;
-            //            recoverDate();
+            recoverDate();
             autoCommit();
             addhook();
             logger.info(String.format(" [end] CacheFactory started %s ", sdf.format(new Date())));
@@ -103,25 +103,27 @@ public class CacheFactory<T> {
     }
 
     //检查是否有些主题的历史数据  有的话就先恢复
-    //    private void recoverDate() {
-    //        //判断topic对应的目录是否存在
-    //        //如果存在 则
-    //        List<String> topics = new ArrayList<String>();
-    //        for (String top : topics) {
-    //            Map<Long, Long> map = DBClient.getAllActive(top);
-    //            if (map != null) {
-    //                for (Long t : map.keySet()) {
-    //                    LiveEntity<Long> entity = new LiveEntity<Long>(t, map.get(t), true);
-    //                    try {
-    //                        putFromDB(entity);
-    //                    } catch (Exception e) {
-    //                        e.printStackTrace();
-    //                    }
-    //                }
-    //                logger.info(" finish recover data from file " + map.keySet().size());
-    //            }
-    //        }
-    //    }
+    private void recoverDate() {
+
+        logger.info("恢复数据...");
+        //判断topic对应的目录是否存在
+        //如果存在 则
+        //        List<String> topics = new ArrayList<String>();
+        //        for (String top : topics) {
+        //            Map<Long, Long> map = DBClient.getAllActive(top);
+        //            if (map != null) {
+        //                for (Long t : map.keySet()) {
+        //                    LiveEntity<Long> entity = new LiveEntity<Long>(t, map.get(t), true);
+        //                    try {
+        //                        putFromDB(entity);
+        //                    } catch (Exception e) {
+        //                        e.printStackTrace();
+        //                    }
+        //                }
+        //                logger.info(" finish recover data from file " + map.keySet().size());
+        //            }
+        //        }
+    }
 
     //定时commit数据
     private void autoCommit() {

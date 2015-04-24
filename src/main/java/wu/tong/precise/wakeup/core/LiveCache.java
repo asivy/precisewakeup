@@ -1,6 +1,7 @@
 package wu.tong.precise.wakeup.core;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -51,6 +52,8 @@ public class LiveCache<T> {
     private String topic;
     private String subTopic;
     private CountDownLatch latch;
+
+    volatile boolean hasretry = false;
 
     DB activeDB = null;//
     DB doneDB = null;//
@@ -161,21 +164,41 @@ public class LiveCache<T> {
             filename.append(donefile).append(".log");
         }
         String name = filename.toString();
+        File file = null;
         try {
-            File file = new File(name);
+            file = new File(name);
             if (file.exists()) {
                 Files.touch(file);
             } else {
                 Files.createParentDirs(file);
                 file.createNewFile();
             }
-            db = DBMaker.newFileDB(file).asyncWriteFlushDelay(100).asyncWriteEnable().asyncWriteQueueSize(100).make();
-            return db;
-        } catch (Exception e) {
-            logger.error("active file", e);
+            db = DBMaker.newFileDB(file).asyncWriteFlushDelay(100).asyncWriteQueueSize(100).make();
+        } catch (Throwable e) {
+            //e.printStackTrace();
+            //logger.error("active file", e);
+            reBuildDataFile(file);
         }
 
-        return null;
+        return db;
+    }
+
+    //可能因kill -9 pid 导致文件格式错误   此时就把原文件删除 并新建一个
+    private void reBuildDataFile(File file) {
+        try {
+            logger.info("[Warnning] rebuild file " + file.getPath() + File.separator + file.getName());
+            file.delete();
+            file.createNewFile();
+            synchronized (LiveCache.class) {
+                if (!hasretry) {
+                    hasretry = true;
+                    getMapDB(true);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public <T> boolean isExist(T t) {
