@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import wu.tong.precise.wakeup.core.CacheFactory;
 import wu.tong.precise.wakeup.core.LiveEntity;
@@ -27,13 +28,12 @@ public class PreciseWakeUpMain {
     static final ExecutorService fixExecutor = Executors.newFixedThreadPool(50);
 
     static CacheFactory factory;
-    
+
     public static void main(String[] args) {
         try {
-            factory = new CacheFactory<Long>().coreSize(8).topic("test");
+            PropertyConfigurator.configure("D:/log4j.properties");
+            factory = new CacheFactory<Long>().coreSize(16).topic("test");
             factory.start();
-
-            Thread.sleep(3000);
 
             PreciseWakeUpMain precise = new PreciseWakeUpMain();
             precise.datamock();
@@ -93,12 +93,12 @@ public class PreciseWakeUpMain {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        //  System.out.println(String.format(" %d %s %s %s ", cnt.get(), Thread.currentThread().getName(), sdf1.format(Calendar.getInstance().getTime()), entity.toString()));
+                        //                        System.out.println(String.format(" %d %s %s %s ", cnt.get(), Thread.currentThread().getName(), sdf1.format(Calendar.getInstance().getTime()), entity.toString()));
                         //                        if (cnt.get() > 5000) {
                         //                            System.exit(1);
                         //                        }
                     }
-                }, 0l, 5l, TimeUnit.MILLISECONDS);
+                }, 0l, 1l, TimeUnit.MILLISECONDS);
             }
         } catch (Exception e) {
             e.printStackTrace();
