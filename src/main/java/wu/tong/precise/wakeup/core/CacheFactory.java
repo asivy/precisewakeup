@@ -13,10 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.mapdb.DB;
 
-import wu.tong.precise.wakeup.data.DBClient;
 import wu.tong.precise.wakeup.main.PreciseWakeUpMain;
-
-import com.google.common.base.Preconditions;
 
 /**
  * 提供静态工厂   维护所有cache 
@@ -131,7 +128,7 @@ public class CacheFactory<T> {
         Random r = new Random();
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(coreSize);
         for (LiveCache cache : cacheList) {
-            scheduler.scheduleAtFixedRate(new commitThread(cache), Math.abs(r.nextInt()) % coreSize, 10000l, TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(new commitThread(cache), Math.abs(r.nextInt()) % coreSize, 30l, TimeUnit.SECONDS);
         }
     }
 
@@ -203,7 +200,7 @@ public class CacheFactory<T> {
                 if (db != null) {
                     db.commit();
                     db.compact();
-                    //   logger.info(String.format(" %s %s activedb commit ", myCache.getTopic(), myCache.getSubTopic()));
+                    //  logger.info(String.format(" %s %s activedb commit %s", myCache.getTopic(), myCache.getSubTopic(), sdf.format(new Date())));
                 }
             } catch (Exception e) {
                 logger.error(myCache.getSubTopic() + " active ", e);
@@ -213,7 +210,7 @@ public class CacheFactory<T> {
                 if (db != null) {
                     db.commit();
                     db.compact();
-                    // logger.info(String.format(" %s %s doneDB commit ", myCache.getTopic(), myCache.getSubTopic()));
+                    //   logger.info(String.format(" %s %s doneDB commit %s ", myCache.getTopic(), myCache.getSubTopic(), sdf.format(new Date())));
                 }
             } catch (Exception e) {
                 logger.error(myCache.getSubTopic() + " done ", e);

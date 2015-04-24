@@ -43,7 +43,8 @@ public class LiveCache<T> {
     static final ExecutorService reactor = Executors.newSingleThreadExecutor();//读取消息线程池
     static final ExecutorService worker = Executors.newCachedThreadPool();//消息的处理线程池
 
-    static final ReentrantLock lock = new ReentrantLock();//是否是读写锁要好些
+    static final ReentrantLock activeLock = new ReentrantLock();
+    static final ReentrantLock doneLock = new ReentrantLock();
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     MessageHandler handler = null;
@@ -90,17 +91,17 @@ public class LiveCache<T> {
             }
             if (!fromFile) {
                 try {
-                    lock.tryLock(200, TimeUnit.MILLISECONDS);//此处不一定能获取到锁  再unlock时可能出错
+                    activeLock.tryLock(200, TimeUnit.MILLISECONDS);//此处不一定能获取到锁  再unlock时可能出错
                     if (isExist(entity.getT())) {
                         queue.remove(entity);
                         removeActive(entity.getT());
                     }
-                    queue.put(entity);
                     putActive(entity.getT(), entity.getRemoveTime());
+                    queue.put(entity);
                 } catch (Exception e) {
                     logger.error(e);
                 } finally {
-                    lock.unlock();
+                    activeLock.unlock();
                 }
             } else {
                 queue.put(entity);
@@ -124,13 +125,20 @@ public class LiveCache<T> {
                     public void run() {
                         handler.handle(liveEntity);
                         try {
-                            //                            lock.tryLock(100, TimeUnit.MILLISECONDS);
+                            activeLock.tryLock(100, TimeUnit.MILLISECONDS);
                             removeActive(liveEntity.getT());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            activeLock.unlock();
+                        }
+                        try {
+                            doneLock.tryLock(100, TimeUnit.MILLISECONDS);
                             putDone(liveEntity.getT(), liveEntity.getRemoveTime());
                         } catch (Exception e) {
                             e.printStackTrace();
                         } finally {
-                            //                            lock.unlock();
+                            doneLock.unlock();
                         }
                     }
                 });
@@ -161,7 +169,7 @@ public class LiveCache<T> {
                 Files.createParentDirs(file);
                 file.createNewFile();
             }
-            db = DBMaker.newFileDB(file).asyncWriteFlushDelay(1000).asyncWriteEnable().asyncWriteQueueSize(100).make();
+            db = DBMaker.newFileDB(file).asyncWriteFlushDelay(100).asyncWriteEnable().asyncWriteQueueSize(100).make();
             return db;
         } catch (Exception e) {
             logger.error("active file", e);
